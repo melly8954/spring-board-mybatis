@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:p6spy:mysql://localhost:${MYSQL_LOCAL_PORT}/${DB_NAME}?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  data:
+    redis:
+      host: localhost
+      port: ${REDIS_LOCAL_PORT}  # ???? ??? ?? 6379
+      database: 1
