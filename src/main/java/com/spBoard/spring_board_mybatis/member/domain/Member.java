@@ -1,4 +1,4 @@
-package com.equip.spring_board_mybatis.member.domain;
+package com.spBoard.spring_board_mybatis.member.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
