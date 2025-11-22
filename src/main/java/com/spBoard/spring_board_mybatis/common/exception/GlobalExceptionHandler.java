@@ -1,0 +1,49 @@
+package com.spBoard.spring_board_mybatis.common.exception;
+
+
+import com.spBoard.spring_board_mybatis.common.controller.ResponseController;
+import com.spBoard.spring_board_mybatis.common.dto.ResponseDto;
+import com.spBoard.spring_board_mybatis.common.trace.RequestTraceIdFilter;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+
+@Slf4j
+@RestControllerAdvice
+public class GlobalExceptionHandler implements ResponseController {
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<ResponseDto<Void>> handleCustomException(CustomException e) {
+        String traceId = RequestTraceIdFilter.getTraceId();
+        ErrorType errorType = e.getErrorType();
+        String message = e.getMessage();
+        log.error("TraceId: {}, 비즈니스 로직 예외 발생 - Code: {}, Message: {}",
+                traceId, errorType.getErrorCode(), message);
+
+        return makeResponseEntity(
+                traceId,
+                errorType.getStatus(),
+                errorType.getErrorCode(),
+                message,
+                null
+        );
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ResponseDto<Void>> handleMaxUploadSizeExceeded(MaxUploadSizeExceededException e) {
+        String traceId = RequestTraceIdFilter.getTraceId();
+
+        ErrorType errorType = ErrorType.FILE_SIZE_EXCEEDED;
+        log.error("TraceId: {}, 파일 첨부 업로드 크기 예외 발생 - Code: {}, Message: {}",
+                traceId, errorType.getErrorCode(), errorType.getMessage());
+
+        return makeResponseEntity(
+                traceId,
+                errorType.getStatus(),
+                errorType.getErrorCode(),
+                errorType.getMessage(),
+                null
+        );
+    }
+}
