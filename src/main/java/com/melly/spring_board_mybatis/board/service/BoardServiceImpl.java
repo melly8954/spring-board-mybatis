@@ -7,6 +7,7 @@ import com.melly.spring_board_mybatis.board.dto.*;
 import com.melly.spring_board_mybatis.board.mapper.BoardMapper;
 import com.melly.spring_board_mybatis.board.mapper.BoardTypeMapper;
 import com.melly.spring_board_mybatis.common.dto.PageResponseDto;
+import com.melly.spring_board_mybatis.common.dto.SearchParamDto;
 import com.melly.spring_board_mybatis.common.exception.CustomException;
 import com.melly.spring_board_mybatis.common.exception.ErrorType;
 import com.melly.spring_board_mybatis.filestorage.domain.FileDto;
@@ -15,8 +16,6 @@ import com.melly.spring_board_mybatis.filestorage.service.FileService;
 import com.melly.spring_board_mybatis.member.domain.Member;
 import com.melly.spring_board_mybatis.member.mapper.MemberMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -121,45 +120,37 @@ public class BoardServiceImpl implements BoardService {
     @Override
     @Transactional(readOnly = true)
     public PageResponseDto<BoardListResponse> searchBoard(BoardFilter filter) {
-        List<Board> boards = boardMapper.searchBoard(
+        SearchParamDto param = new SearchParamDto(
+                filter.getPage(),
+                filter.getSize(),
+                filter.getSortBy(),
+                filter.getSortOrder()
+        );
+
+        List<BoardListResponse> content = boardMapper.searchBoard(
                 filter.getBoardTypeCode(),
                 filter.getSearchType(),
                 filter.getSearchKeyword(),
-                filter.getOffset(),
                 filter.getLimit(),
+                filter.getOffset(),
                 filter.getOrderBy()
         );
 
-        int totalElements = boardMapper.countBoard(
+        int total = boardMapper.countBoard(
                 filter.getBoardTypeCode(),
                 filter.getSearchType(),
                 filter.getSearchKeyword()
         );
 
-
-        List<BoardListResponse> content =boards.stream()
-                .map(b -> BoardListResponse.builder()
-                        .boardId(b.getBoardId())
-                        .boardType(b.getBoardType().getName())
-                        .title(b.getTitle())
-                        .viewCount(b.getViewCount())
-                        .likeCount(b.getLikeCount())
-                        .writeName(b.getWriter().getName())
-                        .createdAt(b.getCreatedAt())
-                        .build())
-                .toList();
-
-        int totalPages = (int) Math.ceil((double) totalElements / filter.getSize());
-
         return PageResponseDto.<BoardListResponse>builder()
                 .content(content)
-                .page(filter.getPage())
-                .size(filter.getSize())
-                .totalElements(totalElements)
-                .totalPages(totalPages)
+                .page(param.getPage())
+                .size(param.getSize())
+                .totalElements(total)
+                .totalPages((total + param.getSize() - 1) / param.getSize())
                 .numberOfElements(content.size())
-                .first(filter.getPage() == 1)
-                .last(filter.getPage() == totalPages)
+                .first(param.getPage() == 1)
+                .last(param.getPage() * param.getSize() >= total)
                 .empty(content.isEmpty())
                 .build();
     }

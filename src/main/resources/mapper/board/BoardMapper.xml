@@ -8,4 +8,65 @@
         VALUES ( #{boardType.boardTypeId}, #{writer.memberId}, #{title}, #{content}, #{viewCount}, #{likeCount}, #{status}, NOW())
     </insert>
 
+    <select id="searchBoard" resultType="com.melly.spring_board_mybatis.board.dto.BoardListResponse">
+        SELECT
+        b.board_id AS boardId,
+        bt.name AS boardType,
+        b.title,
+        b.view_count AS viewCount,
+        b.like_count AS likeCount,
+        m.name AS writeName,
+        b.created_at AS createdAt
+        FROM board_tbl b
+        LEFT JOIN member_tbl m ON b.writer_id = m.member_id
+        LEFT JOIN board_type_tbl bt ON b.board_type_id = bt.board_type_id
+        <where>
+            <if test="boardTypeCode != null and boardTypeCode != ''">
+                AND bt.code = #{boardTypeCode}
+            </if>
+            <if test="searchType != null and searchType != '' and searchKeyword != null and searchKeyword != ''">
+                <choose>
+                    <when test="searchType == 'title'">
+                        AND b.title LIKE CONCAT('%', #{searchKeyword}, '%')
+                    </when>
+                    <when test="searchType == 'content'">
+                        AND b.content LIKE CONCAT('%', #{searchKeyword}, '%')
+                    </when>
+                    <when test="searchType == 'writer'">
+                        AND m.username LIKE CONCAT('%', #{searchKeyword}, '%')
+                    </when>
+                </choose>
+            </if>
+        </where>
+        <if test="orderBy != null and orderBy != ''">
+            ORDER BY b.${orderBy}
+        </if>
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countBoard" resultType="int">
+        SELECT COUNT(*)
+        FROM board_tbl b
+        LEFT JOIN member_tbl m ON b.writer_id = m.member_id
+        LEFT JOIN board_type_tbl bt ON b.board_type_id = bt.board_type_id
+        <where>
+            <if test="boardTypeCode != null and boardTypeCode != ''">
+                AND bt.code = #{boardTypeCode}
+            </if>
+            <if test="searchType != null and searchType != '' and searchKeyword != null and searchKeyword != ''">
+                <choose>
+                    <when test="searchType == 'title'">
+                        AND b.title LIKE CONCAT('%', #{searchKeyword}, '%')
+                    </when>
+                    <when test="searchType == 'content'">
+                        AND b.content LIKE CONCAT('%', #{searchKeyword}, '%')
+                    </when>
+                    <when test="searchType == 'writer'">
+                        AND m.username LIKE CONCAT('%', #{searchKeyword}, '%')
+                    </when>
+                </choose>
+            </if>
+        </where>
+    </select>
+
 </mapper>
