@@ -9,3 +9,10 @@ spring:
       host: localhost
       port: ${REDIS_LOCAL_PORT}  # ???? ??? ?? 6379
       database: 1
+
+file:
+  access-url-base: http://localhost:8080/files/
+  storage-path: C:/spring_board_mybatis/files/
+  directories:
+    member: member
+    board: board
