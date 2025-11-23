@@ -2,9 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.melly.spring_board_mybatis.filestorage.mapper.FileMapper">
+
     <insert id="insertFile" parameterType="FileDto" useGeneratedKeys="true" keyProperty="fileId">
-        INSERT INTO file_tbl ( related_type, related_id, original_name, unique_name, file_path, file_type, file_size, file_order, created_at)
-        VALUES ( #{relatedType}, #{relatedId}, #{originalName}, #{uniqueName}, #{filePath}, #{fileType}, #{fileSize}, #{fileOrder}, NOW())
+        INSERT INTO file_tbl ( related_type, related_id, original_name, unique_name, file_path, file_type, file_size, file_order, created_at
+        ) VALUES ( #{relatedType}, #{relatedId}, #{originalName}, #{uniqueName}, #{filePath}, #{fileType}, #{fileSize}, #{fileOrder}, NOW())
     </insert>
 
     <select id="findByRelatedTypeAndRelatedId" resultType="FileDto">
@@ -14,4 +15,22 @@
           AND related_id = #{relatedId}
             LIMIT 1
     </select>
+
+    <insert id="insertAllFiles" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="fileId">
+        INSERT INTO file_tbl ( related_type, related_id, original_name, unique_name, file_path, file_type, file_size, file_order, created_at )
+        VALUES
+        <foreach collection="list" item="file" separator=",">
+            (
+            #{file.relatedType},
+            #{file.relatedId},
+            #{file.originalName},
+            #{file.uniqueName},
+            #{file.filePath},
+            #{file.fileType},
+            #{file.fileSize},
+            #{file.fileOrder},
+            NOW()
+            )
+        </foreach>
+    </insert>
 </mapper>

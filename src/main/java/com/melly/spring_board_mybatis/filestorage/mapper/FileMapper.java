@@ -4,8 +4,11 @@ import com.melly.spring_board_mybatis.filestorage.domain.FileDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 @Mapper
 public interface FileMapper {
     void insertFile(FileDto file);
     FileDto findByRelatedTypeAndRelatedId(@Param("relatedType") String relatedType, @Param("relatedId") Long relatedId);
+    void insertAllFiles(List<FileDto> savedFiles);
 }

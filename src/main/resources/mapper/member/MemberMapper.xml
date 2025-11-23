@@ -2,6 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.melly.spring_board_mybatis.member.mapper.MemberMapper">
+
     <insert id="insertMember" parameterType="Member" useGeneratedKeys="true" keyProperty="memberId">
         INSERT INTO member_tbl (
             username, password, name, role, status, created_at

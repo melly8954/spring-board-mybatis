@@ -1,0 +1,22 @@
+package com.melly.spring_board_mybatis.board.dto;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+
+import java.time.LocalDateTime;
+
+@Getter
+@AllArgsConstructor
+@Builder
+public class BoardListResponse {
+    private Long boardId;
+    private String boardType;
+    private String title;
+    private Integer viewCount;
+    private Integer likeCount;
+    private String writeName;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createdAt;
+}
