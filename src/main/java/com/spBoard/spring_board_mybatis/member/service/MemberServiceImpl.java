@@ -10,12 +10,15 @@ import com.spBoard.spring_board_mybatis.member.domain.MemberRole;
 import com.spBoard.spring_board_mybatis.member.domain.MemberStatus;
 import com.spBoard.spring_board_mybatis.member.dto.CreateMemberRequest;
 import com.spBoard.spring_board_mybatis.member.dto.CreateMemberResponse;
+import com.spBoard.spring_board_mybatis.member.dto.MemberDto;
 import com.spBoard.spring_board_mybatis.member.mapper.MemberMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -71,12 +74,19 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public Member findById(Long memberId) {
-        return memberMapper.findById(memberId);
+    @Transactional(readOnly = true)
+    public MemberDto getCurrentMember(Long memberId) {
+        Member member = Optional.ofNullable(memberMapper.findById(memberId))
+                .orElseThrow(() -> new CustomException(ErrorType.NOT_FOUND, "현재 접속 중인 사용자가 존재하지 않습니다."));
+        FileDto file = Optional.ofNullable(fileMapper.findByRelatedTypeAndRelatedId("member", memberId))
+                .orElse(null);
+
+        return MemberDto.builder()
+                .memberId(member.getMemberId())
+                .username(member.getUsername())
+                .name(member.getName())
+                .profileImage(file != null ? file.getFilePath() : null)
+                .build();
     }
 
-    @Override
-    public Member findByUsername(String username) {
-        return memberMapper.findByUsername(username);
-    }
 }

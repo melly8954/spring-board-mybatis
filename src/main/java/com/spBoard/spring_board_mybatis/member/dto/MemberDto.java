@@ -1,0 +1,15 @@
+package com.spBoard.spring_board_mybatis.member.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+@Builder
+public class MemberDto {
+    private Long memberId;
+    private String username;
+    private String name;
+    private String profileImage;
+}

@@ -7,4 +7,11 @@
         VALUES ( #{relatedType}, #{relatedId}, #{originalName}, #{uniqueName}, #{filePath}, #{fileType}, #{fileSize}, #{fileOrder}, NOW())
     </insert>
 
+    <select id="findByRelatedTypeAndRelatedId" resultType="FileDto">
+        SELECT *
+        FROM file_tbl
+        WHERE related_type = #{relatedType}
+          AND related_id = #{relatedId}
+            LIMIT 1
+    </select>
 </mapper>

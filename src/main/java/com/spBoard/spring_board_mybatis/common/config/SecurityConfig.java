@@ -1,10 +1,15 @@
 package com.spBoard.spring_board_mybatis.common.config;
 
+import com.spBoard.spring_board_mybatis.auth.jwt.JwtFilter;
+import com.spBoard.spring_board_mybatis.auth.jwt.JwtProvider;
+import com.spBoard.spring_board_mybatis.auth.security.CustomAuthenticationProvider;
 import com.spBoard.spring_board_mybatis.common.trace.RequestTraceIdFilter;
+import com.spBoard.spring_board_mybatis.member.mapper.MemberMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -28,6 +33,9 @@ import java.util.Collections;
 public class SecurityConfig {
     private final PasswordEncoder passwordEncoder;
     private final RequestTraceIdFilter requestTraceIdFilter;
+    private final JwtProvider jwtProvider;
+    private final MemberMapper memberMapper;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -44,6 +52,7 @@ public class SecurityConfig {
                         .requestMatchers("/files/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(requestTraceIdFilter, UsernamePasswordAuthenticationFilter.class) // Trace ID 먼저
+                .addFilterBefore(new JwtFilter(jwtProvider, memberMapper, redisTemplate), UsernamePasswordAuthenticationFilter.class) // JWT 인증
                 // 교차 출처 리소스 공유(CORS 요청 허용)
                 .cors((corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
                     @Override
@@ -62,5 +71,16 @@ public class SecurityConfig {
                     }
                 })));
         return http.build();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    // 미등록 시 기본 AuthenticationProvider 실행
+    @Bean
+    public AuthenticationProvider customAuthenticationProvider() {
+        return new CustomAuthenticationProvider(memberMapper, passwordEncoder);
     }
 }
