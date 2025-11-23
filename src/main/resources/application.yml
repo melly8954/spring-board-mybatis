@@ -21,6 +21,6 @@ spring:
 
 mybatis:
   mapper-locations: classpath*:mapper/**/*.xml
-  type-aliases-package: com.spBoard.spring_board_mybatis
+  type-aliases-package: com.melly.spring_board_mybatis
   configuration:
     map-underscore-to-camel-case: true
